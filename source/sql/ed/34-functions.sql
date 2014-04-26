@@ -39,22 +39,26 @@ $$
 LANGUAGE SQL;
 
 -- MAJ des way_id de la table georef.house_number
+-- See also http://workshops.boundlessgeo.com/postgis-intro/knn.html
 CREATE OR REPLACE FUNCTION georef.nearest_way_id(point_in GEOGRAPHY(POINT, 4326))
   RETURNS bigint AS
 $func$
 BEGIN
-RETURN (select tmp.way_id from(
-select ed.way_id, ST_Distance(ed.the_geog, point_in) as distance
-from georef.edge ed
-where st_dwithin(
-		point_in,
-		ed.the_geog,100)
-AND st_expand(ed.the_geog::geometry, 100) && point_in::geometry
-
-order by distance
-limit 1 )tmp
+RETURN (
+WITH closest_candidates AS (
+  SELECT
+    ed.way_id,
+    ed.the_geog
+  FROM
+    georef.edge ed
+  ORDER BY ed.the_geog::geometry <-> point_in::geometry
+  LIMIT 100
+)
+SELECT way_id
+FROM closest_candidates
+ORDER BY ST_Distance(the_geog, point_in)
+LIMIT 1
 );
-
 END
 $func$ LANGUAGE plpgsql;
 
