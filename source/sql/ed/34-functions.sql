@@ -59,7 +59,20 @@ END
 $func$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION georef.update_house_number() RETURNS VOID AS $$
-UPDATE georef.house_number set way_id=georef.nearest_way_id(coord);
+update georef.house_number hn
+SET way_id = tmp.way_id
+FROM (
+    SELECT DISTINCT ON (coord) coord,way_id
+    FROM (
+    select ed.way_id, ST_Distance(ed.the_geog, hn.coord) as distance,hn.coord as coord FROM
+    georef.house_number  hn,georef.edge ed 
+    where st_dwithin(
+    		hn.coord,
+    		ed.the_geog,100)
+    AND st_expand(ed.the_geog::geometry, 100) && hn.coord::geometry) tmp
+    order by coord,distance
+) tmp
+WHERE hn.coord = tmp.coord;
 $$
 LANGUAGE SQL;
 
