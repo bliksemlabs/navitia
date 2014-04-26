@@ -94,6 +94,13 @@ BEGIN
         RAISE NOTICE 'relation "edge_the_geom_idx" already exists, skipping';
     END CASE;
 
+    CASE WHEN (select count(*) = 0 from pg_indexes where indexname = 'house_number_coord_idx')
+    THEN
+        CREATE INDEX house_number_coord_idx ON georef.house_number USING gist(coord);
+    ELSE
+        RAISE NOTICE 'relation "house_number_coord_idx" already exists, skipping';
+    END CASE;
+
    CASE WHEN (select count(*) = 0 from pg_indexes where indexname = 'edge_way_id_idx')
     THEN
         CREATE INDEX edge_way_id_idx ON georef.edge(way_id);
