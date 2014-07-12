@@ -446,6 +446,24 @@ BOOST_AUTO_TEST_CASE(validity_pattern){
 }
 */
 
+BOOST_AUTO_TEST_CASE(transfer_with_dwell){
+    ed::builder b("20120614");
+    b.vj("A", "11111111", "", true)("ut"  , 76020,76200)("asd1", 77820,78120)("ass1", 78480);
+    b.vj("B", "11111111", "", true)("ass2", 77940,77940)("asd2", 78300,78420)("assp", 78300,78720);
+    b.connection("asd1", "asd2", 5*60);
+    b.connection("asd2", "asd1", 5*60);
+    b.finish();
+    b.data->pt_data->index();
+    b.data->build_raptor();
+    b.data->build_uri();
+    RAPTOR raptor(*(b.data));
+    type::PT_Data & d = *b.data->pt_data;
+
+    auto res1 = raptor.compute(d.stop_areas_map["ut"], d.stop_areas_map["assp"], 76000, 0, DateTimeUtils::inf, false, true);
+    BOOST_REQUIRE_EQUAL(res1.size(), 1);
+}
+
+
 BOOST_AUTO_TEST_CASE(marche_a_pied_milieu){
     ed::builder b("20120614");
     b.vj("A", "11111111", "", true)("stop1", 8000,8050)("stop2", 8200,8250);
