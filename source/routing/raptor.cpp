@@ -59,7 +59,7 @@ void RAPTOR::apply_vj_extension(const Visitor& v, const bool global_pruning,
     bool add_vj = false;
     while(vj) {
         BOOST_FOREACH(type::StopTime* st, v.stop_time_list(vj)) {
-            if(!st->valid_end(v.clockwise()) ||
+            if(!st->journey_pattern_point->valid_end(v.clockwise()) ||
                     !st->is_valid_day(DateTimeUtils::date(workingDt), !v.clockwise(), disruption_active)) {
                 continue;
             }
@@ -339,7 +339,7 @@ void RAPTOR::raptor_loop(Visitor visitor, const type::AccessibiliteParams & acce
                                                 DateTimeUtils::hour(workingDt));
                         DateTimeUtils::update(workingDt, current_time, visitor.clockwise());
                         // We check if there are no drop_off_only and if the local_zone is okay
-                        if(st->valid_end(visitor.clockwise())&&
+                        if(jpp->valid_end(visitor.clockwise())&&
                                 (l_zone == std::numeric_limits<uint16_t>::max() ||
                                  l_zone != st->local_traffic_zone)) {
                             const DateTime bound = (visitor.comp(best_labels[jpp_idx], b_dest.best_now) || !global_pruning) ?

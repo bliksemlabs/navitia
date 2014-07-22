@@ -799,22 +799,28 @@ struct StopPoint : public Header, Nameable, hasProperties, HasMessages, Codes{
 
 struct JourneyPatternPoint : public Header{
     const static Type_e type = Type_e::JourneyPatternPoint;
-    int order;
-    bool main_stop_point;
-    int fare_section;
     JourneyPattern* journey_pattern;
     StopPoint* stop_point;
+    int fare_section; //TODO Deprecated? Never used
+    uint16_t order; 
+    bool main_stop_point; //TODO Deprecated? Never used
+    bool pick_up_allowed;
+    bool drop_off_allowed;
 
-    JourneyPatternPoint() : order(0), main_stop_point(false), fare_section(0), journey_pattern(nullptr), stop_point(nullptr){}
+    JourneyPatternPoint() : journey_pattern(nullptr), stop_point(nullptr), fare_section(0), order(0),
+            main_stop_point(false), pick_up_allowed(true), drop_off_allowed(true){}
+
+    // Can we end on this journey_pattern_point, in the direction we want to disembark
+    inline bool valid_end(bool clockwise) const {return clockwise ? drop_off_allowed : pick_up_allowed;}
 
     // Attention la sérialisation est répartrie dans deux methode: save et load
     template<class Archive> void save(Archive & ar, const unsigned int) const{
         ar & idx & uri & order & main_stop_point & fare_section & journey_pattern
-                & stop_point & order ;
+                & stop_point & order & pick_up_allowed & drop_off_allowed;
     }
     template<class Archive> void load(Archive & ar, const unsigned int) {
         ar & idx & uri & order & main_stop_point & fare_section & journey_pattern
-                & stop_point & order;
+                & stop_point & order & pick_up_allowed & drop_off_allowed;
         //on remplit le tableau des stoppoints, bizarrement ca segfault au chargement si on le fait à la bina...
         this->stop_point->journey_pattern_point_list.push_back(this);
     }
@@ -827,8 +833,6 @@ struct JourneyPatternPoint : public Header{
 };
 
 struct StopTime {
-    static const uint8_t PICK_UP = 0;
-    static const uint8_t DROP_OFF = 1;
     static const uint8_t ODT = 2;
     static const uint8_t IS_FREQUENCY = 3;
     static const uint8_t WHEELCHAIR_BOARDING = 4;
@@ -845,22 +849,13 @@ struct StopTime {
     JourneyPatternPoint* journey_pattern_point = nullptr;
     std::string comment;
 
-    bool pick_up_allowed() const {return properties[PICK_UP];}
-    bool drop_off_allowed() const {return properties[DROP_OFF];}
     bool odt() const {return properties[ODT];}
     bool is_frequency() const {return properties[IS_FREQUENCY];}
     bool date_time_estimated() const {return properties[DATE_TIME_ESTIMATED];}
 
-    inline void set_pick_up_allowed(bool value) {properties[PICK_UP] = value;}
-    inline void set_drop_off_allowed(bool value) {properties[DROP_OFF] = value;}
     inline void set_odt(bool value) {properties[ODT] = value;}
     inline void set_is_frequency(bool value) {properties[IS_FREQUENCY] = value;}
     inline void set_date_time_estimated(bool value) {properties[DATE_TIME_ESTIMATED] = value;}
-
-
-
-    /// Est-ce qu'on peut finir par ce stop_time : dans le sens avant on veut descendre
-    bool valid_end(bool clockwise) const {return clockwise ? drop_off_allowed() : pick_up_allowed();}
 
     bool is_odt_and_date_time_estimated() const{ return (this->odt() && this->date_time_estimated());}
     /// Heure de fin de stop_time : dans le sens avant, c'est la fin, sinon le départ

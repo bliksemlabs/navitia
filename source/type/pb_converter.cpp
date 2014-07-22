@@ -47,12 +47,12 @@ namespace navitia{
 void fill_pb_object(const navitia::type::StopTime* stop_time, const type::Data&,
                     pbnavitia::Properties* properties, int,
                     const boost::posix_time::ptime&, const boost::posix_time::time_period&){
-    if (((!stop_time->drop_off_allowed()) && stop_time->pick_up_allowed())
+    if (((!stop_time->journey_pattern_point->drop_off_allowed) && stop_time->journey_pattern_point->pick_up_allowed)
         // No display pick up only information if first stoptime in vehiclejourney
         && ((stop_time->vehicle_journey != nullptr) && (stop_time->vehicle_journey->stop_time_list.front() != stop_time))){
         properties->add_additional_informations(pbnavitia::Properties::pick_up_only);
     }
-    if((stop_time->drop_off_allowed() && (!stop_time->pick_up_allowed()))
+    if((stop_time->journey_pattern_point->drop_off_allowed && (!stop_time->journey_pattern_point->pick_up_allowed))
         // No display drop off only information if last stoptime in vehiclejourney
         && ((stop_time->vehicle_journey != nullptr) && (stop_time->vehicle_journey->stop_time_list.back() != stop_time))){
         properties->add_additional_informations(pbnavitia::Properties::drop_off_only);
@@ -526,8 +526,8 @@ void fill_pb_object(const nt::StopTime* st, const type::Data &data,
 
     p = boost::posix_time::seconds(st->departure_time);
     stop_time->set_departure_time(navitia::to_iso_string_no_fractional(p));
-    stop_time->set_pickup_allowed(st->pick_up_allowed());
-    stop_time->set_drop_off_allowed(st->drop_off_allowed());
+    stop_time->set_pickup_allowed(st->journey_pattern_point->pick_up_allowed);
+    stop_time->set_drop_off_allowed(st->journey_pattern_point->drop_off_allowed);
     if(st->journey_pattern_point != nullptr && depth > 0) {
         fill_pb_object(st->journey_pattern_point, data,
                        stop_time->mutable_journey_pattern_point(), depth-1,

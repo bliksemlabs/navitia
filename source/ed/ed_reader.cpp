@@ -482,7 +482,8 @@ void EdReader::fill_journey_patterns(nt::Data& data, pqxx::work& work){
 
 void EdReader::fill_journey_pattern_points(nt::Data& data, pqxx::work& work){
     std::string request = "SELECT id, name, uri, comment, \"order\","
-        "stop_point_id, journey_pattern_id FROM navitia.journey_pattern_point";
+        "stop_point_id, journey_pattern_id, pick_up_allowed,drop_off_allowed "
+        "FROM navitia.journey_pattern_point";
 
     pqxx::result result = work.exec(request);
     for(auto const_it = result.begin(); const_it != result.end(); ++const_it){
@@ -493,6 +494,9 @@ void EdReader::fill_journey_pattern_points(nt::Data& data, pqxx::work& work){
 
         jpp->journey_pattern = journey_pattern_map[const_it["journey_pattern_id"].as<idx_t>()];
         jpp->journey_pattern->journey_pattern_point_list.push_back(jpp);
+
+        jpp->pick_up_allowed = const_it["pick_up_allowed"].as<bool>();
+        jpp->drop_off_allowed = const_it["drop_off_allowed"].as<bool>();
 
         jpp->stop_point = stop_point_map[const_it["stop_point_id"].as<idx_t>()];
 
@@ -690,10 +694,9 @@ void EdReader::fill_vehicle_journeys(nt::Data& data, pqxx::work& work){
 
 void EdReader::fill_stop_times(nt::Data& data, pqxx::work& work){
     std::string request = "SELECT vehicle_journey_id, journey_pattern_point_id, arrival_time, departure_time, " // 0, 1, 2, 3
-        "local_traffic_zone, start_time, end_time, headway_sec, odt, pick_up_allowed, " // 4, 5, 6, 7, 8, 9, 10
-        "drop_off_allowed, is_frequency, date_time_estimated, comment " // 11, 12
+        "local_traffic_zone, start_time, end_time, headway_sec, odt, "
+        "is_frequency, date_time_estimated, comment "
         "FROM navitia.stop_time;";
-
     pqxx::result result = work.exec(request);
     for(auto const_it = result.begin(); const_it != result.end(); ++const_it){
         nt::StopTime* stop = new nt::StopTime();
@@ -708,10 +711,6 @@ void EdReader::fill_stop_times(nt::Data& data, pqxx::work& work){
         stop->set_date_time_estimated(const_it["date_time_estimated"].as<bool>());
 
         stop->set_odt(const_it["odt"].as<bool>());
-
-        stop->set_pick_up_allowed(const_it["pick_up_allowed"].as<bool>());
-
-        stop->set_drop_off_allowed(const_it["drop_off_allowed"].as<bool>());
 
         stop->set_is_frequency(const_it["is_frequency"].as<bool>());
 

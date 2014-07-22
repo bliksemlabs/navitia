@@ -464,6 +464,8 @@ void Data::build_journey_pattern_points(){
                 journey_pattern_point_map[journey_pattern_point_extcode] = journey_pattern_point;
                 journey_pattern_point->order = stop_seq;
                 journey_pattern_point->uri = journey_pattern_point_extcode;
+                journey_pattern_point->pick_up_allowed = stop_time->pick_up_allowed;
+                journey_pattern_point->drop_off_allowed = stop_time->drop_off_allowed;
                 this->journey_pattern_points.push_back(journey_pattern_point);
             } else {
                 journey_pattern_point = journey_pattern_point_it->second;
@@ -489,13 +491,16 @@ void Data::build_journey_pattern_points(){
 }
 
 // Check if two vehicle_journey's belong to the same journey_pattern
+// vehicle_journeys in the same journey_pattern have the same stop behavior at the same stops
 bool same_journey_pattern(types::VehicleJourney * vj1, types::VehicleJourney * vj2){
 
     if(vj1->stop_time_list.size() != vj2->stop_time_list.size())
         return false;
 
     for(size_t i = 0; i < vj1->stop_time_list.size(); ++i)
-        if(vj1->stop_time_list[i]->tmp_stop_point != vj2->stop_time_list[i]->tmp_stop_point){
+        if(vj1->stop_time_list[i]->tmp_stop_point   != vj2->stop_time_list[i]->tmp_stop_point  ||
+           vj1->stop_time_list[i]->pick_up_allowed  != vj2->stop_time_list[i]->pick_up_allowed ||
+           vj1->stop_time_list[i]->drop_off_allowed != vj2->stop_time_list[i]->drop_off_allowed){
             return false;
         }
     return true;

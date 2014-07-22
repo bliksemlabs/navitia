@@ -84,13 +84,13 @@ void update_adapted_validity_pattern(nt::VehicleJourney* vehicle_journey,
 pt::time_period build_stop_period(const nt::StopTime& stop,
         const bg::date& date){
     pt::ptime departure, arrival;
-    if(/*stop.departure_time < 0 ||*/ !stop.pick_up_allowed()){
+    if( ! stop.journey_pattern_point->pick_up_allowed ){
         departure = pt::ptime(date, pt::seconds(stop.arrival_time + 1));
     }else{
         departure = pt::ptime(date, pt::seconds(stop.departure_time));
     }
 
-    if(/*stop.arrival_time < 0 ||*/ !stop.drop_off_allowed()){
+    if( ! stop.journey_pattern_point->drop_off_allowed ){
         arrival = pt::ptime(date, pt::seconds(stop.departure_time - 1));
     }else if(stop.arrival_time == stop.departure_time){
         //si l'heure d'arrivée et égal à l'heure de départ (typiquement donnée urbaine) on soustrait une seconde pour avoir une période non nulle

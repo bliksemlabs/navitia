@@ -725,7 +725,7 @@ void EdPersistor::insert_validity_patterns(const std::vector<types::ValidityPatt
 void EdPersistor::insert_stop_times(const std::vector<types::StopTime*>& stop_times){
     this->lotus.prepare_bulk_insert("navitia.stop_time",
             {"arrival_time", "departure_time", "local_traffic_zone", "start_time",
-             "end_time", "headway_sec", "odt", "pick_up_allowed", "drop_off_allowed",
+             "end_time", "headway_sec", "odt",
              "is_frequency", "journey_pattern_point_id", "vehicle_journey_id",
              "comment", "date_time_estimated"});
     size_t inserted_count = 0;
@@ -743,8 +743,6 @@ void EdPersistor::insert_stop_times(const std::vector<types::StopTime*>& stop_ti
         values.push_back(std::to_string(stop->end_time));
         values.push_back(std::to_string(stop->headway_secs));
         values.push_back(std::to_string(stop->ODT));
-        values.push_back(std::to_string(stop->pick_up_allowed));
-        values.push_back(std::to_string(stop->drop_off_allowed));
         values.push_back(std::to_string(stop->is_frequency));
 
         if(stop->journey_pattern_point != NULL){
@@ -766,9 +764,8 @@ void EdPersistor::insert_stop_times(const std::vector<types::StopTime*>& stop_ti
             LOG4CPLUS_INFO(logger, inserted_count<<"/"<< size_st <<" inserted stop times");
             this->lotus.prepare_bulk_insert("navitia.stop_time",
             {"arrival_time", "departure_time", "local_traffic_zone", "start_time",
-             "end_time", "headway_sec", "odt", "pick_up_allowed", "drop_off_allowed",
-             "is_frequency", "journey_pattern_point_id", "vehicle_journey_id",
-             "comment", "date_time_estimated"});
+             "end_time", "headway_sec", "odt", "is_frequency", "journey_pattern_point_id", 
+             "vehicle_journey_id", "comment", "date_time_estimated"});
         }
     }
     this->lotus.finish_bulk_insert();
@@ -777,7 +774,7 @@ void EdPersistor::insert_stop_times(const std::vector<types::StopTime*>& stop_ti
 void EdPersistor::insert_journey_pattern_point(const std::vector<types::JourneyPatternPoint*>& journey_pattern_points){
     this->lotus.prepare_bulk_insert("navitia.journey_pattern_point",
             {"id", "uri", "name", "comment", "\"order\"",
-            "stop_point_id", "journey_pattern_id"});
+            "stop_point_id", "journey_pattern_id","pick_up_allowed", "drop_off_allowed"});
 
     for(types::JourneyPatternPoint* jpp : journey_pattern_points){
         std::vector<std::string> values;
@@ -798,6 +795,9 @@ void EdPersistor::insert_journey_pattern_point(const std::vector<types::JourneyP
         }else{
             values.push_back(lotus.null_value);
         }
+
+        values.push_back(std::to_string(jpp->pick_up_allowed));
+        values.push_back(std::to_string(jpp->drop_off_allowed));
         this->lotus.insert(values);
     }
 

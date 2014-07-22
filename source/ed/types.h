@@ -238,15 +238,19 @@ struct VehicleJourney: public Header, Nameable, hasVehicleProperties{
 
 struct JourneyPatternPoint : public Header, Nameable{
     const static nt::Type_e type = nt::Type_e::JourneyPatternPoint;
-    int order;
-    bool main_stop_point;
-    int fare_section;
     JourneyPattern* journey_pattern;
     StopPoint* stop_point;
 
+    int fare_section;
+    uint16_t order;
+    bool main_stop_point;
+    bool pick_up_allowed;
+    bool drop_off_allowed;
+
     nt::JourneyPatternPoint* get_navitia_type() const;
 
-    JourneyPatternPoint() : order(0), main_stop_point(false), fare_section(0), journey_pattern(NULL), stop_point(NULL){}
+    JourneyPatternPoint() : journey_pattern(NULL), stop_point(NULL), fare_section(0), order(0),
+            main_stop_point(true), pick_up_allowed(true), drop_off_allowed(true) {}
 
     bool operator<(const JourneyPatternPoint& other) const;
 };

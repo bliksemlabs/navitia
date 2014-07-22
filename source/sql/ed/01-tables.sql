@@ -296,7 +296,9 @@ CREATE TABLE IF NOT EXISTS navitia.journey_pattern_point (
     uri TEXT NOT NULL,
     "order" INTEGER NOT NULL,
     comment TEXT,
-    stop_point_id BIGINT NOT NULL REFERENCES navitia.stop_point
+    stop_point_id BIGINT NOT NULL REFERENCES navitia.stop_point,
+    pick_up_allowed BOOLEAN NOT NULL,
+    drop_off_allowed BOOLEAN NOT NULL
 );
 
 
@@ -311,8 +313,6 @@ CREATE TABLE IF NOT EXISTS navitia.stop_time (
     end_time INTEGER,
     headway_sec INTEGER,
     odt BOOLEAN NOT NULL,
-    pick_up_allowed BOOLEAN NOT NULL,
-    drop_off_allowed BOOLEAN NOT NULL,
     is_frequency BOOLEAN NOT NULL,
     comment TEXT,
     date_time_estimated BOOLEAN NOT NULL DEFAULT false,

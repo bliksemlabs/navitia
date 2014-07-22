@@ -31,6 +31,19 @@ $$;
 DO $$
     BEGIN
         BEGIN
+            ALTER TABLE navitia.journey_pattern_point ADD COLUMN pick_up_allowed BOOLEAN NOT NULL DEFAULT TRUE;
+            ALTER TABLE navitia.journey_pattern_point ADD COLUMN drop_off_allowed BOOLEAN NOT NULL DEFAULT TRUE;
+            ALTER TABLE navitia.stop_time DROP COLUMN drop_off_allowed;
+            ALTER TABLE navitia.stop_time DROP COLUMN pick_up_allowed;
+        EXCEPTION
+            WHEN duplicate_column THEN RAISE NOTICE 'column pick_up_allowed,drop_off_allowed already exists in navitia.journey_pattern_point';
+        END;
+    END;
+$$;
+
+DO $$
+    BEGIN
+        BEGIN
             ALTER TABLE navitia.connection ADD COLUMN display_duration integer NOT NULL DEFAULT 0;
         EXCEPTION
             WHEN duplicate_column THEN RAISE NOTICE 'column display_duration already exists in navitia.connection.';

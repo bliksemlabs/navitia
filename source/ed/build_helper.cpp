@@ -191,8 +191,8 @@ VJ & VJ::operator()(const std::string & sp_name, int arrivee, int depart, uint16
     st->vehicle_journey = vj;
     jpp->order = vj->stop_time_list.size();
     st->local_traffic_zone = local_trafic_zone;
-    st->set_drop_off_allowed(drop_off_allowed);
-    st->set_pick_up_allowed(pick_up_allowed);
+    jpp->drop_off_allowed = drop_off_allowed;
+    jpp->pick_up_allowed = pick_up_allowed;
 
     vj->stop_time_list.push_back(st);
     b.data->pt_data->stop_times.push_back(st);
@@ -380,10 +380,10 @@ void builder::connection(const std::string & name1, const std::string & name2, f
      build_blocks();
      for(navitia::type::VehicleJourney* vj : this->data->pt_data->vehicle_journeys) {
          if(!vj->prev_vj) {
-             vj->stop_time_list.front()->set_drop_off_allowed(false);
+             vj->stop_time_list.front()->journey_pattern_point->drop_off_allowed = false;
          }
          if(!vj->next_vj) {
-            vj->stop_time_list.back()->set_pick_up_allowed(false);
+            vj->stop_time_list.back()->journey_pattern_point->pick_up_allowed = false;
          }
      }
  }
